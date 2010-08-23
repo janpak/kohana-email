@@ -118,7 +118,29 @@ class Email {
 				if (is_array($set))
 				{
 					// Add a recipient with name
-					$message->$method($set[0], $set[1]);
+					
+					// If set is something like a
+                                        // 'cc' => array( array(  'person1@example.org', 'person2@otherdomain.org' => 'Person 2 Name', 'person3@example.org' ) );
+					if (count($set) == 1 && is_array($set[0]) )
+					{
+						foreach ($set[0] as $value)
+						{
+							if (is_array($value))
+							{
+								// Add a recipient with name
+								$message->$method($value[0], $value[1]);
+							}
+							else
+							{
+								// Add a recipient without name
+								$message->$method($value);
+							}
+						}
+					}
+					else
+					{
+						$message->$method($set[0], $set[1]);
+					}
 				}
 				else
 				{
