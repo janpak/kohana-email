@@ -17,15 +17,18 @@ Note: PopBeforeSmtp is not supported in this release as I didn't know what was r
 It IS supported in Swiftmailer through the Swift_Plugins_PopBeforeSmtpPlugin plugin class. This can be used manually if required.
 If anyone can modify and test the connect() methd with this functionality I'll add it but I can't find documentation about how it used to work (i.e. is expected to work) so I have left it out for now.
 
-### Email::send($to, $from, $subject, $message, $html = false)
+### Email::send($to, $from, $subject, $message, $html = false, $headers = array())
 
 $to can be any of the following:
 
 *  a single string email address e.g. "test@example.com"
 *  an array specifying an email address and a name e.g. array('test@example.com', 'John Doe')
 *  an array of recipients in either above format, keyed by type e.g. array('to' => 'test@example.com', 'cc' => array('test2@example.com', 'Jane Doe'), 'bcc' => 'another@example.com')
+*  an array of pairs ('email address' => 'name') in either above format, keyed by type e.g. array('to' => 'test@example.com', 'cc' => array('test2@example.com', 'Jane Doe'), 'bcc' => array(array('sales@example.com', 'Jane Morrigan'), array('manager@example.com', 'Alex Doe')) )
 
 $from can be either a string email or array of email and name as above
+
+$headers is an array of pair 'header_key' => 'header_value'
 
 More complex email (multipart, attachments, batch mailing etc.) must be done using the native Swift_Mailer classes. The Swift Mailer autoloader is included by connect() so you can use and class in the Swift library without worrying about including files.
 
