@@ -80,7 +80,7 @@ class Email {
 	 * @param   boolean       send email as HTML
 	 * @return  integer       number of emails sent
 	 */
-	public static function send($to, $from, $subject, $message, $html = FALSE)
+	public static function send($to, $from, $subject, $message, $html = FALSE, $header = array())
 	{
 		// Connect to SwiftMailer
 		(Email::$mail === NULL) and email::connect();
@@ -160,6 +160,19 @@ class Email {
 			// From with a name
 			$message->setFrom($from[0], $from[1]);
 		}
+
+                // Apply additional headers, like a List-Unsubscribe: <http://domain.com/member/unsubscribe/?listname=espc-tech@domain.com?id=12345N>
+                // Header format is array('List-Unsubscribe'=>'<http://domain.com/member/unsubscribe/?listname=espc-tech@domain.com?id=12345N>')
+                if (count($header))
+                {
+                        $headers = $message->getHeaders();
+
+                        foreach ($header as $name=>$value)
+                        {
+                            $headers->addTextHeader($name, $value);
+
+                        }
+                }
 
 		return Email::$mail->send($message);
 	}
