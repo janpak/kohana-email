@@ -15,7 +15,11 @@ class Email {
 
 	// SwiftMailer instance
 	protected static $mail;
+	protected $message;
+	public static function factory(){
+		return new Email;
 
+	}
 	/**
 	 * Creates a SwiftMailer instance.
 	 *
@@ -80,7 +84,7 @@ class Email {
 	 * @param   boolean       send email as HTML
 	 * @return  integer       number of emails sent
 	 */
-	public static function send($to, $from, $subject, $message, $html = FALSE, $header = array())
+	public function message($to, $from, $subject, $message, $html = FALSE, $header = array())
 	{
 		// Connect to SwiftMailer
 		(Email::$mail === NULL) and email::connect();
@@ -89,12 +93,12 @@ class Email {
 		$html = ($html === TRUE) ? 'text/html' : 'text/plain';
 
 		// Create the message
-		$message = Swift_Message::newInstance($subject, $message, $html, 'utf-8');
+		$this->message = Swift_Message::newInstance($subject, $message, $html, 'utf-8');
 
 		if (is_string($to))
 		{
 			// Single recipient
-			$message->setTo($to);
+			$this->message->setTo($to);
 		}
 		elseif (is_array($to))
 		{
@@ -128,24 +132,24 @@ class Email {
 							if (is_array($value))
 							{
 								// Add a recipient with name
-								$message->$method($value[0], $value[1]);
+								$this->message->$method($value[0], $value[1]);
 							}
 							else
 							{
 								// Add a recipient without name
-								$message->$method($value);
+								$this->message->$method($value);
 							}
 						}
 					}
 					else
 					{
-						$message->$method($set[0], $set[1]);
+						$this->message->$method($set[0], $set[1]);
 					}
 				}
 				else
 				{
 					// Add a recipient without name
-					$message->$method($set);
+					$this->message->$method($set);
 				}
 			}
 		}
@@ -153,19 +157,19 @@ class Email {
 		if (is_string($from))
 		{
 			// From without a name
-			$message->setFrom($from);
+			$this->message->setFrom($from);
 		}
 		elseif (is_array($from))
 		{
 			// From with a name
-			$message->setFrom($from[0], $from[1]);
+			$this->message->setFrom($from[0], $from[1]);
 		}
 
                 // Apply additional headers, like a List-Unsubscribe: <http://domain.com/member/unsubscribe/?listname=espc-tech@domain.com?id=12345N>
                 // Header format is array('List-Unsubscribe'=>'<http://domain.com/member/unsubscribe/?listname=espc-tech@domain.com?id=12345N>')
                 if (count($header))
                 {
-                        $headers = $message->getHeaders();
+                        $headers = $this->message->getHeaders();
 
                         foreach ($header as $name=>$value)
                         {
@@ -174,7 +178,22 @@ class Email {
                         }
                 }
 
-		return Email::$mail->send($message);
+		return $this;
 	}
 
+	public function __call($func,$args){
+			$class = new ReflectionClass($this->message);
+			if($class->hasMethod($func)){
+				$class->getMethod($func)->invokeArgs($this->message,$args);
+				return $this;
+
+			}
+			return false;
+
+	}
+
+	public function send(){
+
+		return Email::$mail->send($this->message);
+	}
 } // End email
